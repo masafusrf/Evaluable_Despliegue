@@ -8,7 +8,7 @@ session_start();
 */
 
 $NUM_DIGITS = 3;
-$MAX_ATTEMPTS = 10;
+$MAX_ATTEMPTS = 2;
 
 // Inicializar o reiniciar el juego
 if (!isset($_SESSION['secret']) || isset($_GET['reset'])) {
@@ -49,16 +49,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$finished) {
             'partial' => $partial
         ];
 
-        // Verificar si ganó o perdió
-        if ($exact == $NUM_DIGITS) {
-            $_SESSION['finished'] = true;
-            $_SESSION['won'] = true;
-        } elseif (count($_SESSION['attempts']) >= $MAX_ATTEMPTS) {
-            $_SESSION['finished'] = true;
-        }
+    // Verificar si ganó o perdió
+    if ($exact == $NUM_DIGITS) {
+        $_SESSION['finished'] = true;
+        $_SESSION['won'] = true;
 
-        header("Location: index.php");
+        header("Location: resultado.php");
         exit;
+
+    } elseif (count($_SESSION['attempts']) >= $MAX_ATTEMPTS) {
+        $_SESSION['finished'] = true;
+        $_SESSION['won'] = false;
+
+        header("Location: resultado.php");
+        exit;
+    }
+
+    header("Location: index.php");
+    exit;
     }
 }
 
@@ -86,11 +94,6 @@ $remaining = $MAX_ATTEMPTS - count($_SESSION['attempts']);
     <p>Intentos restantes: <?= $remaining ?></p>
   <?php else: ?>
     <div class="result">
-      <?php if ($won): ?>
-        <h3>¡Correcto! El número era <?= htmlspecialchars($secret) ?>.</h3>
-      <?php else: ?>
-        <h3>¡Has perdido! El número era <?= htmlspecialchars($secret) ?>.</h3>
-      <?php endif; ?>
       <p><a href="?reset=1"><button>Jugar otra vez</button></a></p>
     </div>
   <?php endif; ?>
